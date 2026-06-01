@@ -11,12 +11,13 @@ import {
 } from 'react-leaflet';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'react-toastify';
+import { confirmDelete } from '../utils/confirmAlert';
 
 export default function DetailReport() {
   const auth = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const { id } = useParams();
-  const [report, setReport] = useState([]);
+  const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [reportOfficer, setReportOfficer] = useState({
@@ -186,9 +187,6 @@ export default function DetailReport() {
         draggable: true,
       });
     }
-
-    const updatedImageReport = [...report.imageReport];
-    updatedImageReport.splice(itemIndex, 1);
   };
 
   const sendOfficeReport = async (e) => {
@@ -300,9 +298,7 @@ export default function DetailReport() {
   };
 
   const deleteReport = async (id) => {
-    const userConfirmation = window.confirm(
-      `Apakah kamu yakin ingin menghapus laporan?`,
-    );
+    const userConfirmation = await confirmDelete('laporan ini');
     if (!userConfirmation) {
       return;
     }
@@ -361,6 +357,8 @@ export default function DetailReport() {
     <div className="animate__fadeIn animate__animated animate__delay-1s box-border rounded-3xl bg-white px-4 py-8 drop-shadow md:p-12">
       {loading ? (
         <p>Loading...</p>
+      ) : !report ? (
+        <p>Laporan tidak ditemukan.</p>
       ) : (
         <>
         <h2 className='md:text-2xl text-lg font-semibold text-slate-900'>Detail Laporan</h2>
@@ -377,7 +375,7 @@ export default function DetailReport() {
               </div>
             ) : null}
             <div className="flex flex-col md:flex-row mb-4">
-              {report.imageReport &&
+              {report.imageReport?.length > 0 &&
                 report.imageReport.map((image, index) => (
                   <img
                     key={index}
@@ -638,10 +636,10 @@ export default function DetailReport() {
             {auth.user.role !== 'officer' ? (
               <div className="w-full">
                 <h3 className="font-bold text-primary-600 mb-4">
-                  Komentar ({report.comment.length})
+                  Komentar ({report.comment?.length ?? 0})
                 </h3>
                 <div className="border border-gray-200 p-2 md:p-4">
-                  {report.comment.map((comment, index) => (
+                  {(report.comment ?? []).map((comment, index) => (
                     <article
                       key={comment._id}
                       className={`p-6 text-base bg-white ${

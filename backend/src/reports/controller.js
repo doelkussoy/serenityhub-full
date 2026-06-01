@@ -95,9 +95,10 @@ async function getDetailReport(req, res, next) {
       });
     }
   } catch (err) {
+    console.error('getDetailReport error:', err);
     return res.json({
       error: 1,
-      message: 'Laporan tidak ditemukan',
+      message: err.message || 'Laporan tidak ditemukan',
     });
   }
 }

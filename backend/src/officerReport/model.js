@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../../connection');
+const User = require('../user/model');
 
 const OfficerReport = sequelize.define('OfficerReport', {
   id: {
@@ -60,6 +61,10 @@ OfficerReport.prototype.toJSON = function () {
   values._id = this.id;
   return values;
 };
+
+// Relasi ke User sebagai officer
+OfficerReport.belongsTo(User, { as: 'officer', foreignKey: 'officerId' });
+User.hasMany(OfficerReport, { foreignKey: 'officerId' });
 
 module.exports = OfficerReport;
 

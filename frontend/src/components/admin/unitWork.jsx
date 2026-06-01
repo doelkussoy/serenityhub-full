@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { confirmDelete } from '../../utils/confirmAlert';
 
 const UnitWork = () => {
   const [unitWorkData, setUnitWorkData] = useState([]);
@@ -28,7 +29,7 @@ const UnitWork = () => {
   }, [reload]);
 
   const handleDelete = async (unitWorkId, unitWorkName) => {
-    const userConfirmation = window.confirm(`Apakah kamu yakin ingin menghapus Unit Kerja: ${unitWorkName}?`);
+    const userConfirmation = await confirmDelete(`Unit Kerja ${unitWorkName}`);
     if (!userConfirmation) {
       return;
     }

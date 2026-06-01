@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Sidebar from '../sideBar';
 import TopBar from '../topBar';
@@ -7,64 +7,103 @@ import Footer from './footer';
 
 function Dashboard({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+      if (window.innerWidth >= 768) setIsSidebarOpen(false);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
-    <div className="relative">
-      <div className="left-0 top-0 flex h-[7vh] w-full items-center justify-between bg-[#3C8DBC] p-8  sticky top-0 z-50">
-        <div>
-          <h3 className="text-start font-semibold text-white">SerenityHub</h3>
-        </div>
-        <button
-          type="button"
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className={`absolute left-0 top-[3.8rem] z-[9999] ml-3 mt-2 block items-center rounded-lg p-2 text-sm text-gray-500 transition-transform duration-500 ease-in-out bg-gray-300  hover:bg-gray-100 focus:outline-none focus:ring-2 dark:text-gray-400 sm:hidden ${
-            isSidebarOpen ? 'translate-x-56 left-7' : ''
-          }`}
-        >
-          <span className="sr-only">Open sidebar</span>
-          <svg
-            className="h-6 w-6"
-            aria-hidden="true"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              clipRule="evenodd"
-              fillRule="evenodd"
-              d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
-            ></path>
-          </svg>
-        </button>
-        <TopBar />
-      </div>
-      <div className="flex min-h-screen bg-gray-200 relative">
-        <aside
-          id="default-sidebar"
-          className={`left-0 z-40 w-64 md:sticky  ${
-            isSidebarOpen
-              ? 'translate-x-0 '
-              : ' -translate-x-full absolute h-screen md:h-auto'
-          } sm:translate-x-0 transition-all duration-500`}
-          aria-label="Sidebar"
-        >
-          <div className=" overflow-y-auto bg-[#222D32] sticky top-10">
-            <Sidebar
-              menus={menus}
-              closeSidebar={() => setIsSidebarOpen(false)}
-            />
+    <div className="flex flex-col min-h-screen bg-slate-100">
+      {/* Top Navigation Bar */}
+      <header className="sticky top-0 z-50 w-full">
+        <div className="flex items-center justify-between h-16 px-4 md:px-6 bg-gradient-to-r from-[#1a3a5c] to-[#2563eb] shadow-lg shadow-blue-900/20">
+          {/* Left: Hamburger + Brand */}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200 md:hidden"
+              aria-label="Toggle sidebar"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {isSidebarOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+            {/* Desktop toggle */}
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="hidden md:flex p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200"
+              aria-label="Toggle sidebar"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                </svg>
+              </div>
+              <span className="text-white font-bold text-lg tracking-wide">SerenityHub</span>
+            </div>
           </div>
-        </aside>
-        <main
-          className={`overflow-hidden p-0 md:p-6 ${
-            isSidebarOpen ? 'translate-x-16 flex-1' : '  translate-x-0 flex-1'
-          } transition-all duration-500`}
+
+          {/* Right: TopBar */}
+          <TopBar />
+        </div>
+      </header>
+
+      {/* Body: Sidebar + Main */}
+      <div className="flex flex-1 relative">
+        {/* Mobile Overlay */}
+        {isMobile && isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
+        {/* Sidebar */}
+        <aside
+          className={`
+            fixed md:sticky top-16 left-0 z-40 h-[calc(100vh-4rem)]
+            w-64 shrink-0
+            transition-transform duration-300 ease-in-out
+            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+            md:translate-x-0
+            ${!isSidebarOpen && 'md:w-0 md:overflow-hidden'}
+            ${isSidebarOpen && 'md:w-64'}
+          `}
+          style={{ willChange: 'transform' }}
         >
-          {/* Add your content here */}
-          {children}
+          <Sidebar
+            menus={menus}
+            closeSidebar={() => setIsSidebarOpen(false)}
+          />
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 min-w-0 p-3 md:p-6 overflow-x-hidden">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
         </main>
       </div>
 
-      <Footer></Footer>
+      <Footer />
     </div>
   );
 }

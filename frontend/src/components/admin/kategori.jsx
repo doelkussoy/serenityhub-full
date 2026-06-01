@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { confirmDelete } from '../../utils/confirmAlert';
 
 const Categories = () => {
   const [categoryData, setCateogoryData] = useState([]);
@@ -27,9 +28,7 @@ const Categories = () => {
   }, [reload]);
 
   const handleDelete = async (categoryId, categoryName) => {
-    const userConfirmation = window.confirm(
-      `Apakah kamu yakin ingin menghapus kategori: ${categoryName}?`,
-    );
+    const userConfirmation = await confirmDelete(`kategori ${categoryName}`);
     if (!userConfirmation) {
       return;
     }
