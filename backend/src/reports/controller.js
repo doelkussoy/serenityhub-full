@@ -4,6 +4,7 @@ const UnitWork = require('../unitWork/model');
 const OfficerReport = require('../officerReport/model');
 const Comment = require('../comment/model');
 const { Op } = require('sequelize');
+const { sendNewReportNotification } = require('../utils/mailer');
 
 // Helper to format Sequelize errors
 function formatSequelizeError(err, res) {
@@ -36,6 +37,24 @@ async function addReport(req, res, next) {
     });
 
     if (newReport) {
+      // Kirim email notifikasi ke semua admin (tidak blocking)
+      try {
+        const admins = await User.findAll({ where: { role: 'admin' }, attributes: ['email', 'name'] });
+        const adminEmails = admins.map((a) => a.email).filter(Boolean);
+        if (adminEmails.length > 0) {
+          await sendNewReportNotification({
+            to: adminEmails.join(', '),
+            reportTitle: newReport.title,
+            reportCategory: newReport.category,
+            reportDescription: newReport.description,
+            reporterName: user.name,
+            reportAddress: newReport.address,
+          });
+        }
+      } catch (mailErr) {
+        console.error('Gagal mengirim email notifikasi:', mailErr.message);
+      }
+
       return res.json({
         status: 'ok',
         message: 'Berhasil menambahkan laporan',
@@ -105,16 +124,16 @@ async function getDetailReport(req, res, next) {
 
 async function getAllReport(req, res, next) {
   try {
-    let { limit = 8, skip = 0, q = '', status = '' } = req.query;
+    let { limit = 8, skip = 0, q = '', status = '', category = '' } = req.query;
     let criteria = {};
     if (q.length) {
       criteria.title = { [Op.like]: `%${q}%` };
     }
     if (status.length) {
       criteria.status = status;
-      if (q.length) {
-        criteria.title = { [Op.like]: `%${q}%` };
-      }
+    }
+    if (category.length) {
+      criteria.category = category;
     }
     const count = await ReportUser.count({ where: criteria });
     const report = await ReportUser.findAll({

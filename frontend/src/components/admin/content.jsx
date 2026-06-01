@@ -11,6 +11,7 @@ import UnitWork from './unitWork';
 import NewUnitWorks from './newUnitWorks';
 import Officer from './officer';
 import NewOfficer from './newOfficer';
+import EditOfficer from './editOfficer';
 
 export default function ContentOfficer() {
   const auth = useSelector((state) => state.auth);
@@ -45,6 +46,10 @@ export default function ContentOfficer() {
       <Route
         path="/officer/new"
         element={<GuardRoute element={<NewOfficer />} />}
+      />
+      <Route
+        path="/officer/edit/:id"
+        element={<GuardRoute element={<EditOfficer />} />}
       />
     </Routes>
   );

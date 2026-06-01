@@ -49,15 +49,8 @@ export default function DetailReport() {
   }, [id, auth.token]);
 
   function SetViewOnClick() {
-    const map = useMapEvent('click', () => {
-      map.setView(
-        { lat: report.latitude, lng: report.longitude },
-        map.getZoom(),
-        {
-          duration: 1,
-          animate: true,
-        },
-      );
+    useMapEvent('click', () => {
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${report.latitude},${report.longitude}`, '_blank');
     });
 
     return null;
@@ -454,6 +447,11 @@ export default function DetailReport() {
                   <Marker
                     position={[report.latitude, report.longitude]}
                     icon={newIcon}
+                    eventHandlers={{
+                      click: () => {
+                        window.open(`https://www.google.com/maps/dir/?api=1&destination=${report.latitude},${report.longitude}`, '_blank');
+                      },
+                    }}
                   >
                     <Popup>
                       {`Lat :${report.latitude} 

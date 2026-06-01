@@ -1,35 +1,59 @@
-/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import ListReport from '../ListReport';
 
 export default function SearchAndListReport() {
-  // const [reportData, setReportData] = useState([]);
   const [totalReport, setTotalReport] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [reportSkip, setReportSkip] = useState(0);
   const reportsPerPage = 12;
-  const [statusDropdown, setStatusDropdown] = useState(false);
   
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const initialStatus = queryParams.get('status');
+  const initialCategory = queryParams.get('category');
   
   const [status, setStatus] = useState(initialStatus || '');
+  const [category, setCategory] = useState(initialCategory || '');
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    const newStatus = new URLSearchParams(location.search).get('status');
-    if (newStatus) {
+    const params = new URLSearchParams(location.search);
+    const newStatus = params.get('status');
+    const newCategory = params.get('category');
+    if (newStatus !== null) {
       setStatus(newStatus);
     }
+    if (newCategory !== null) {
+      setCategory(newCategory);
+    }
   }, [location.search]);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data } = await axios.get(`${import.meta.env.VITE_HOST_SERENITY}/category`);
+        if (data && data.data) {
+          setCategories(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await axios.get(`${import.meta.env.VITE_HOST_SERENITY}/report?q=${searchTerm}&${status ? `status=${status}` : null}`);
+        const query = new URLSearchParams();
+        if (searchTerm) query.append('q', searchTerm);
+        if (status) query.append('status', status);
+        if (category) query.append('category', category);
+        const { data } = await axios.get(`${import.meta.env.VITE_HOST_SERENITY}/report?${query.toString()}`);
         setTotalReport(data.count);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -37,7 +61,7 @@ export default function SearchAndListReport() {
     };
 
     fetchData();
-  }, [searchTerm, reportSkip, status]);
+  }, [searchTerm, reportSkip, status, category]);
 
   const handleNextPage = () => {
     setCurrentPage(currentPage + 1);
@@ -56,13 +80,16 @@ export default function SearchAndListReport() {
     setReportSkip((page - 1) * reportsPerPage);
   };
 
-  const handleSelectOption = (selectedStatus) => {
-    setStatus(selectedStatus);
-    setStatusDropdown(false);
-  };
-
   const totalPages = Math.ceil(totalReport / reportsPerPage);
   const pages = [...Array(totalPages).keys()].map((i) => i + 1);
+
+  const buildListReportUrl = () => {
+    const query = new URLSearchParams();
+    if (status) query.append('status', status);
+    if (category) query.append('category', category);
+    const queryString = query.toString();
+    return `${import.meta.env.VITE_HOST_SERENITY}/report?${queryString ? `${queryString}&` : ''}`;
+  };
 
   return (
     <div className=''>
@@ -90,21 +117,28 @@ export default function SearchAndListReport() {
             placeholder='ketik laporan'
           />
         </div>
-        <div className='flex flex-row text-left cursor-pointer w-full md:w-fit'>
+        <div className='flex flex-row text-left cursor-pointer w-full md:w-fit gap-3'>
           <div className='flex flex-row w-full md:w-fit'>
-            <select id='selectOption' onChange={(e) => setStatus(e.target.value)} value={status || ''} className='cursor-pointer py-2 px-4 w-full md:w-fit outline-none rounded-md md:p-2'>
-              <option value='' disabled>
-                Status
-              </option>
-              {/* <option value=''>all</option> */}
+            <select id='selectOption' onChange={(e) => setStatus(e.target.value)} value={status || ''} className='cursor-pointer py-2 px-4 w-full md:w-fit outline-none rounded-md md:p-2 bg-white border border-gray-200 shadow-sm'>
+              <option value=''>Semua Status</option>
               <option value='Menunggu'>Menunggu</option>
               <option value='Diproses'>Diproses</option>
               <option value='Selesai'>Selesai</option>
             </select>
           </div>
+          <div className='flex flex-row w-full md:w-fit'>
+            <select id='selectCategory' onChange={(e) => setCategory(e.target.value)} value={category || ''} className='cursor-pointer py-2 px-4 w-full md:w-fit outline-none rounded-md md:p-2 bg-white border border-gray-200 shadow-sm'>
+              <option value=''>Semua Kategori</option>
+              {categories.map((cat) => (
+                <option key={cat.category_id || cat.id} value={cat.name}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
-      <ListReport searchTerm={searchTerm} currentPage={currentPage} reportsPerPage={reportsPerPage} reportSkip={reportSkip} url={`${import.meta.env.VITE_HOST_SERENITY}/report?${status ? `status=${status}&` : null}&`} />
+      <ListReport searchTerm={searchTerm} currentPage={currentPage} reportsPerPage={reportsPerPage} reportSkip={reportSkip} url={buildListReportUrl()} />
 
       {/* pagination */}
       <nav aria-label='Page navigation example' className='w-full mb-4 mt-4 md:mt-4'>

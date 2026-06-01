@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
 import ListReport from '../../components/ListReport';
 import TimeLine from '../../components/timeline';
@@ -11,6 +12,11 @@ export default function Home() {
   const [searchTerm] = useState('');
   const [currentPage] = useState(1);
   const reportsPerPage = 8;
+  const navigate = useNavigate();
+
+  const handleCategorySelect = (categoryName) => {
+    navigate(`/dashboard/report?category=${categoryName}`);
+  };
 
   return (
     <>
@@ -20,13 +26,15 @@ export default function Home() {
         <TimeLine />
       </section>
       <section id="kategori">
-        <Categories />
+        <Categories onCategoryClick={handleCategorySelect} />
       </section>
       <section id="laporan">
         <div className="py-12 min-h-screen md:pt-24 heroBack">
-          <h1 className="text-center text-2xl md:text-5xl out text-slate-900 font-extrabold mb-8 md:mb-16 uppercase">
-            list laporan
-          </h1>
+          <div className="text-center mb-8 md:mb-16">
+            <h1 className="text-2xl md:text-5xl out text-slate-900 font-extrabold uppercase">
+              list laporan
+            </h1>
+          </div>
           <ListReport
             searchTerm={searchTerm}
             currentPage={currentPage}

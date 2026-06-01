@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const Categories = () => {
+const Categories = ({ onCategoryClick, selectedCategory }) => {
 
   const [categoryData, setCateogoryData] = useState([]);
 
@@ -26,13 +26,19 @@ const Categories = () => {
           <h1 className='text-center text-2xl md:text-5xl out text-primary-600 font-extrabold mb-8 uppercase'>kategori</h1>
           <div className='flex flex-wrap justify-start '>
             {categoryData.map((category, index) => (
-              <div key={index} className='w-1/2 sm:w-1/5 md:w-1/5 lg:w-[14.2857%] group p-4 text-center mb-8'>
+              <div 
+                key={index} 
+                onClick={() => onCategoryClick && onCategoryClick(category.name)}
+                className={`w-1/2 sm:w-1/5 md:w-1/5 lg:w-[14.2857%] group p-4 text-center mb-8 cursor-pointer transition-all duration-300 rounded-xl ${selectedCategory === category.name ? 'bg-primary-50 ring-2 ring-primary-500 shadow-md' : 'hover:bg-white hover:shadow-sm'}`}
+              >
                 <img
-                  className='mx-auto w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12'
+                  className={`mx-auto w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 transition-transform duration-300 ${selectedCategory === category.name ? 'scale-110' : 'group-hover:scale-110'}`}
                   src={`${import.meta.env.VITE_HOST_SERENITY}/public/image/${category.image}`}
                   alt={category.name}
                 />
-                <p className='mt-2 text-base text-[#64748BBF] group-hover:text-primary-600 group-hover:font-semibold'>{category.name}</p>
+                <p className={`mt-2 text-base transition-colors duration-300 ${selectedCategory === category.name ? 'text-primary-700 font-bold' : 'text-[#64748BBF] group-hover:text-primary-600 group-hover:font-semibold'}`}>
+                  {category.name}
+                </p>
               </div>
             ))}
           </div>

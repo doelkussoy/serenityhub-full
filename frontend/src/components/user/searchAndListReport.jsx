@@ -2,32 +2,75 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import ListReport from './ListReport';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 
 export default function SearchAndListReport({ title, url }) {
   // const [reportData, setReportData] = useState([]);
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialStatus = queryParams.get('status');
+  const initialCategory = queryParams.get('category');
+
   const [totalReport, setTotalReport] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [reportSkip, setReportSkip] = useState(0);
   const reportsPerPage = 12;
   const [statusDropdown, setStatusDropdown] = useState(false);
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState(initialStatus || '');
+  const [category, setCategory] = useState(initialCategory || '');
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const newStatus = params.get('status');
+    const newCategory = params.get('category');
+    if (newStatus !== null) setStatus(newStatus);
+    if (newCategory !== null) setCategory(newCategory);
+  }, [location.search]);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data } = await axios.get(`${import.meta.env.VITE_HOST_SERENITY}/category`);
+        if (data && data.data) {
+          setCategories(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const buildUrlParams = () => {
+    const query = new URLSearchParams();
+    if (searchTerm) query.append('q', searchTerm);
+    if (status) query.append('status', status);
+    if (category) query.append('category', category);
+    return query.toString();
+  };
+
+  const auth = useSelector((state) => state.auth);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await axios.get(
-          `${import.meta.env.VITE_HOST_SERENITY}/report?q=${searchTerm}&status=${status}`,
-        );
-        setTotalReport(data.count);
+        const base = url.split('?')[0]; // Get base URL without query
+        const queryStr = buildUrlParams();
+        const headers = auth?.token ? { Authorization: `Bearer ${auth.token}` } : {};
+        const { data } = await axios.get(`${base}?${queryStr}`, { headers });
+        setTotalReport(data.count || 0);
       } catch (error) {
         console.error('Error fetching data:', error);
+        setTotalReport(0);
       }
     };
     fetchData();
-  }, [searchTerm, reportSkip]);
+  }, [searchTerm, reportSkip, status, category, url, auth?.token]);
 
   const handleNextPage = () => {
     setCurrentPage(currentPage + 1);
@@ -53,6 +96,15 @@ export default function SearchAndListReport({ title, url }) {
 
   const totalPages = Math.ceil(totalReport / reportsPerPage);
   const pages = [...Array(totalPages).keys()].map((i) => i + 1);
+
+  const getListReportUrl = () => {
+    const base = url.split('?')[0];
+    const query = new URLSearchParams();
+    if (status) query.append('status', status);
+    if (category) query.append('category', category);
+    const queryStr = query.toString();
+    return `${base}?${queryStr ? `${queryStr}&` : ''}`;
+  };
 
   return (
     <div className="">
@@ -97,13 +149,13 @@ export default function SearchAndListReport({ title, url }) {
             placeholder="ketik laporan"
           />
         </div>
-        <div className="flex flex-row text-left cursor-pointer w-full md:w-fit">
+        <div className="flex flex-row text-left cursor-pointer w-full md:w-fit gap-3">
           <div className="flex flex-row w-full md:w-fit">
             <select
               id="selectOption"
               onChange={(e) => setStatus(e.target.value)}
               value={status || ''}
-              className="cursor-pointer py-2 px-4 w-full md:w-fit outline-none rounded-md md:p-2"
+              className="cursor-pointer py-2 px-4 w-full md:w-fit outline-none rounded-md md:p-2 bg-white border border-gray-200 shadow-sm"
             >
               <option value="" disabled>
                 Status
@@ -112,6 +164,21 @@ export default function SearchAndListReport({ title, url }) {
               <option value="Menunggu">Menunggu</option>
               <option value="Diproses">Diproses</option>
               <option value="Selesai">Selesai</option>
+            </select>
+          </div>
+          <div className="flex flex-row w-full md:w-fit">
+            <select
+              id="selectCategory"
+              onChange={(e) => setCategory(e.target.value)}
+              value={category || ''}
+              className="cursor-pointer py-2 px-4 w-full md:w-fit outline-none rounded-md md:p-2 bg-white border border-gray-200 shadow-sm"
+            >
+              <option value="">Semua Kategori</option>
+              {categories.map((cat) => (
+                <option key={cat.category_id || cat.id} value={cat.name}>
+                  {cat.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -131,7 +198,7 @@ export default function SearchAndListReport({ title, url }) {
         reportsPerPage={reportsPerPage}
         reportSkip={reportSkip}
         status={status}
-        url={url}
+        url={getListReportUrl()}
       />
 
       {/* pagination */}

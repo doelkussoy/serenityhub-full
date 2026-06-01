@@ -4,6 +4,7 @@ import Sidebar from '../sideBar';
 import TopBar from '../topBar';
 import menus from '../../pages/menus';
 import Footer from './footer';
+import { Link } from 'react-router-dom';
 
 function Dashboard({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -51,14 +52,14 @@ function Dashboard({ children }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <div className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2 hover:opacity-85 transition-opacity">
               <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
                 </svg>
               </div>
               <span className="text-white font-bold text-lg tracking-wide">SerenityHub</span>
-            </div>
+            </Link>
           </div>
 
           {/* Right: TopBar */}

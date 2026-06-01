@@ -14,14 +14,14 @@ const Header = () => {
     <header className='sticky top-0 z-50 w-full glass-nav transition-all duration-300'>
       <nav className='px-4 lg:px-6 py-3.5'>
         <div className='mx-auto flex max-w-screen-xl flex-wrap items-center justify-between'>
-          <div className='flex items-center space-x-3'>
+          <Link to='/' className='flex items-center space-x-3 hover:opacity-90 transition-opacity'>
             <div className='relative overflow-hidden rounded-full border-2 border-white shadow-sm'>
               <img src='/logo2.jpg' className='h-10 w-10 md:h-12 md:w-12 object-cover' alt='Logo SerenityHub' />
             </div>
             <span className='self-center whitespace-nowrap text-xl md:text-2xl font-bold text-slate-800 tracking-tight'>
               Serenity<span className="text-primary-600">Hub</span>
             </span>
-          </div>
+          </Link>
           
           <button
             onClick={toggleNavbar}

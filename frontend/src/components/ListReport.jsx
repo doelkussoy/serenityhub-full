@@ -5,6 +5,7 @@ import axios from 'axios';
 import { FaLocationDot } from 'react-icons/fa6';
 import { FaCalendar } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 
 function ListReport({
@@ -16,20 +17,25 @@ function ListReport({
 }) {
   const [reportData, setReportData] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const auth = useSelector((state) => state.auth);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const headers = auth?.token ? { Authorization: `Bearer ${auth.token}` } : {};
         const response = await axios.get(
           `${url}q=${searchTerm}&limit=${reportsPerPage}&skip=${reportSkip}`,
+          { headers }
         );
-        setReportData(response.data.data);
+        setReportData(response.data.data || []);
       } catch (error) {
         console.error('Error fetching data:', error);
+        setReportData([]);
       }
     };
 
     fetchData();
-  }, [searchTerm, reportSkip, url]);
+  }, [searchTerm, reportSkip, url, auth?.token]);
 
   const colorStatus = (status) => {
     if (status === 'Menunggu') {
