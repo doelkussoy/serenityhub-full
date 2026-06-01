@@ -63,7 +63,7 @@ const LoginForm = () => {
       <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
 
       <FloatingButton />
-      
+
       <div className="w-full max-w-md px-6 py-8 relative z-10">
         <div className="glass-card p-8 sm:p-10 transform transition-all duration-300 hover:shadow-2xl">
           <div className="mb-8 text-center">
