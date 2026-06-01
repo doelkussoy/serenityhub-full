@@ -9,7 +9,7 @@ import SearchAndListReport from './searchAndListReport';
 export default function ContentOfficer() {
   const auth = useSelector((state) => state.auth);
   const idUser = auth.user._id;
-  const unitWork = auth.user.unitWork;
+  const unitWork = auth.user.unitWorkId;
 
   return (
     <Routes>
@@ -20,7 +20,7 @@ export default function ContentOfficer() {
             element={
               <SearchAndListReport
                 title="Laporan Masuk"
-                url={`/officer/report/${auth.user.unitWork}`}
+                url={`/officer/report/${auth.user.unitWorkId}`}
               />
             }
           />
@@ -33,7 +33,7 @@ export default function ContentOfficer() {
             element={
               <SearchAndListReport
                 title="Laporan Masuk"
-                url={`/officer/report/${auth.user.unitWork}`}
+                url={`/officer/report/${auth.user.unitWorkId}`}
               />
             }
           />

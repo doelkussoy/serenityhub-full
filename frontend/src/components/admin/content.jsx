@@ -15,7 +15,7 @@ import NewOfficer from './newOfficer';
 export default function ContentOfficer() {
   const auth = useSelector((state) => state.auth);
   const idUser = auth.user._id;
-  const unitWork = auth.user.unitWork;
+  const unitWork = auth.user.unitWorkId;
 
   return (
     <Routes>
