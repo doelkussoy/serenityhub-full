@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import ListReport from '../ListReport';
 
@@ -11,7 +12,19 @@ export default function SearchAndListReport() {
   const [reportSkip, setReportSkip] = useState(0);
   const reportsPerPage = 12;
   const [statusDropdown, setStatusDropdown] = useState(false);
-  const [status, setStatus] = useState(null);
+  
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialStatus = queryParams.get('status');
+  
+  const [status, setStatus] = useState(initialStatus || '');
+
+  useEffect(() => {
+    const newStatus = new URLSearchParams(location.search).get('status');
+    if (newStatus) {
+      setStatus(newStatus);
+    }
+  }, [location.search]);
 
   useEffect(() => {
     const fetchData = async () => {

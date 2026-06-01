@@ -119,9 +119,9 @@ const ReportCard = () => {
                 return statusOrder[a[0]] - statusOrder[b[0]];
               })
               .map(([status, count]) => (
-                <div
-                  key={status}
-                  className={`group overflow-hidden shadow sm:rounded-lg transition-all duration-100 ease-in
+                <Link to={`/dashboard/report?status=${status}`} key={status}>
+                  <div
+                    className={`group overflow-hidden shadow sm:rounded-lg transition-all duration-100 ease-in cursor-pointer
                   ${
                     status === "Menunggu"
                       ? "bg-red-500"
@@ -143,7 +143,8 @@ const ReportCard = () => {
                       </dd>
                     </dl>
                   </div>
-                </div>
+                  </div>
+                </Link>
               ))}
           </div>
         </div>
